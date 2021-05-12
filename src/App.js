@@ -7,8 +7,6 @@ class App extends React.Component {
         super(props);
         const file = 'words.txt';
         var msg = new SpeechSynthesisUtterance();
-        //let voices = window.speechSynthesis.getVoices();
-        //console.log(voices);
         msg.volume = 1; // From 0 to 1
         msg.rate = .8; // From 0.1 to 10
         msg.pitch = 0; // From 0 to 2
@@ -23,11 +21,8 @@ class App extends React.Component {
             voice: "",
             voices: [],
             voiceOptions: "",
-            //voices: window.speechSynthesis.getVoices(),
         };
-        //this.setState((state) => ({voices: window.speechSynthesis.getVoices()}));
-        
-        //this.createVoiceList();
+
         this.textInput = React.createRef();
 
         this.createVoiceList = this.createVoiceList.bind(this);
@@ -51,19 +46,7 @@ class App extends React.Component {
         } else {  // for safari and iOS
             this.createFullVoiceList();
         }
-        //console.log("createVoiceList = ", this.createVoiceList());
-        //this.setState((state) => {return {voices: window.speechSynthesis.getVoices()}});
-        //console.log(this.state.voices);
-        // wait on voices to be loaded before fetching list
-//        window.speechSynthesis.onvoiceschanged = () => {
-//            let voices = [];
-//            //this.setState({voices: voices});
-//            window.speechSynthesis.getVoices().forEach(function(voice) {
-//                this.state.voices.push(voice);
-//                //console.log(voice.name, voice.lang, voice.default ? voice.default :'');
-//            });
-//            this.setState((state) => {return {voices: voices}});
-//        };
+
         this.sayWord = this.sayWord.bind(this);
         this.checkWord = this.checkWord.bind(this);
         this.showMe = this.showMe.bind(this);
@@ -93,30 +76,9 @@ class App extends React.Component {
     }
 
     speak(message) {
-
-        // while msg.speaking { do nothing }
-        // need to make msg global
-        // maybe search through voices for lang = en-US
         window.speechSynthesis.cancel();
-        //var msg = new SpeechSynthesisUtterance();
-        //var voices = window.speechSynthesis.getVoices();
-        //console.log(voices);
-        //let voiceName = 'Google US English';
-        //let index = 0;
-        //for(let i = 0; i < voices.length; i++){
-        //    if(voices[i].lang === 'en-US'){
-        //        index = i;
-        //    }
-        //}
-        //msg.voice = voices[index]; 
-        //msg.volume = 1; // From 0 to 1
-        //msg.rate = .8; // From 0.1 to 10
-        //msg.pitch = 0; // From 0 to 2
         let msg = this.state.msg;
         msg.text = message;
-        //this.setState((state) => {return {msg: msg}});
-        //this.state.msg.text = message;
-        //msg.lang = 'en-US';
         speechSynthesis.speak(msg);
         //speechSynthesis.getVoices().forEach(function(voice) {
         //    console.log(voice.name, voice.lang, voice.default ? voice.default :'');
@@ -144,8 +106,6 @@ class App extends React.Component {
         } else {
             this.speak("try again. " + currentWord);
             this.setState((state) => { return {inputText:""} });      // clear the input field
-            // pause
-            //this.speak(currentWord);
         }
         this.textInput.current.focus();
     }
@@ -193,19 +153,11 @@ class App extends React.Component {
         let voice = event.target.value;
         let msg = this.state.msg;
         let voices = this.state.voices;
-        //console.log("voices = " + voices);
-        //console.log("msg = " + msg.voice);
-        //console.log("event = " + event.target.value);
         for(let i = 0; i < voices.length; i++){
             if(voices[i].name === voice){
                 msg.voice = voices[i];
-                //console.log("Voice Found: " + i + " " + msg.voice);
-            } else {
-                //console.log("Not Found");
             }
         }
-        //msg.voice = event.target.value;
-        //console.log("msg.voice = " + msg.voice);
         this.setState({
                 msg : msg,
                 voice : voice
@@ -224,47 +176,38 @@ class App extends React.Component {
                 arr.push("<option key='"+name+"' value='"+name+"'>"+name+"</option>");
                 voiceOptionString += "<option key='"+name+"' value='"+name+"'>"+name+"</option>";
             }
-            //arr.push(<option key={i} value="{i}">{i}</option>)
         }
-        //this.setState((state) => {return {voices:arr}});
-        //this.setState({state : this.state});
-        //console.log("voices", this.state.voices);
-        //console.log("English ", arr);
-        //console.log("voiceOptionString", voiceOptionString);
         this.setState((state) => {return {voiceOptions : arr}});
         this.setState((state) => {return {voices : voices}});
-        //while(this.state.voiceOptions !== arr){
-        //    console.log("waiting...");
-        //}
-        //console.log("voiceOptions" + arr);
+
         return voiceOptionString; 
     }
 
-    createFullVoiceList() {
+    createFullVoiceList() { // for iOS.  Put Alice voice first in the list.
         var arr = [];
         var voiceOptionString = "";
         let voices = window.speechSynthesis.getVoices();
-        //console.log("voices = ", voices);
+        let alice = -1;
+
         for (let i = 0; i < voices.length; i++) {
-            //console.log(voices[i].name, voices[i].lang);
-            //if(voices[i].lang === 'en-US'){
+            if (voices[i].name === 'Alice'){
+                alice = i;
+            }
+        }
+        if (alice !== -1) {
+            let temp = voices[0];
+            voices[0] = voices[alice];
+            voices[alice] = temp;
+        }
+        for (let i = 0; i < voices.length; i++) {
                 let name = voices[i].name;
                 arr.push("<option key='"+name+"' value='"+name+"'>"+name+"</option>");
                 voiceOptionString += "<option key='"+name+"' value='"+name+"'>"+name+"</option>";
-            //}
-            //arr.push(<option key={i} value="{i}">{i}</option>)
         }
-        //this.setState((state) => {return {voices:arr}});
-        //this.setState({state : this.state});
-        //console.log("voices", this.state.voices);
-        //console.log("English ", arr);
-        //console.log("voiceOptionString", voiceOptionString);
+
         this.setState((state) => {return {voiceOptions : arr}});
         this.setState((state) => {return {voices : voices}});
-        //while(this.state.voiceOptions !== arr){
-        //    console.log("waiting...");
-        //}
-        //console.log("voiceOptions" + arr);
+
         return voiceOptionString; 
     }
 
@@ -308,9 +251,9 @@ class App extends React.Component {
                     Words Left: {this.state.wordsList.length}
                 </p>
                 <span id='voice-select'>
-                    Select a Voice:
+                    Select a Voice:&nbsp;
                     <select id='voice-select'
-                           onChange={this.selectChangeHandler}>
+                            onChange={this.selectChangeHandler}>
                         {ReactHtmlParser(this.state.voiceOptions)}
                     </select>
                 </span>
