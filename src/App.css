@@ -91,3 +91,9 @@ button
 #show-me:active {
     background-color: darkred;
 }
+
+.hidden { display:none; }
+
+.flex-container {
+    display: flex;
+}

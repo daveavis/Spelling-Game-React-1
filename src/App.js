@@ -14,6 +14,7 @@ class App extends React.Component {
         this.state = {
             inputText : "",
             wordsList: this.fileGet(file).trim().split("\n"),
+            fullList: this.fileGet(file).trim(),
             correctWordsList: [],
             currentWord: "",
             showWord: false,
@@ -22,6 +23,7 @@ class App extends React.Component {
             voices: [],
             voiceOptions: "",
             textStatus: "clear",   // 'clear' or 'keep'
+            shouldHide: true,
         };
 
         this.textInput = React.createRef();
@@ -53,6 +55,7 @@ class App extends React.Component {
         this.showMe = this.showMe.bind(this);
         this.changeHandler = this.changeHandler.bind(this);
         this.selectChangeHandler = this.selectChangeHandler.bind(this);
+        this.checkboxChangeHandler = this.checkboxChangeHandler.bind(this);
         this.createVoiceList = this.createVoiceList.bind(this);
     }
 
@@ -96,7 +99,7 @@ class App extends React.Component {
         this.speak(this.state.currentWord);
         if(this.state.textStatus === "clear"){
             this.setState({inputText : ""});
-            this.setState({textStatus    : "keep"});
+            this.setState({textStatus : "keep"});
         }
         
         this.textInput.current.focus();
@@ -178,6 +181,12 @@ class App extends React.Component {
             });
     }
 
+    checkboxChangeHandler(event){
+        // set shouldHide to true or false based on the status of the checkbox
+        let hide = this.state.shouldHide;
+        this.setState({shouldHide : ! hide});
+    }
+
     createVoiceList() {
         var arr = [];
         var voiceOptionString = "";
@@ -231,46 +240,59 @@ class App extends React.Component {
     
     render() {
         return (
-            <div>
-                <button 
-                    id='say-word'
-                    onClick={this.sayWord}>
-                        Say Word
-                </button>
-                <button 
-                    id='check-it'
-                    onClick={this.checkWord}>
-                        Check It
-                </button>
-                <button 
-                    id='show-me'
-                    onClick={this.showMe}>
-                        Show Me
-                </button>
-                
-                <br/>
-                <input 
-                    id='attempt' 
-                    type='text'
-                    ref={this.textInput} 
-                    value={this.state.inputText}
-                    onChange={this.changeHandler}
-                    onKeyPress={this.changeHandler}
-                    spellCheck="false"
-                />
-                <p id='correct'>
-                    Words Correct: {this.state.correctWordsList.length}
-                </p>
-                <p id='words-left'>
-                    Words Left: {this.state.wordsList.length}
-                </p>
-                <span id='voice-select'>
-                    Select a Voice:&nbsp;
-                    <select id='voice-select'
-                            onChange={this.selectChangeHandler}>
-                        {ReactHtmlParser(this.state.voiceOptions)}
-                    </select>
-                </span>
+            <div class='flex-container'>
+                <div>
+                    <button 
+                        id='say-word'
+                        onClick={this.sayWord}>
+                            Say Word
+                    </button>
+                    <button 
+                        id='check-it'
+                        onClick={this.checkWord}>
+                            Check It
+                    </button>
+                    <button 
+                        id='show-me'
+                        onClick={this.showMe}>
+                            Show Me
+                    </button>
+                    
+                    <br/>
+                    <input 
+                        id='attempt' 
+                        type='text'
+                        ref={this.textInput} 
+                        value={this.state.inputText}
+                        onChange={this.changeHandler}
+                        onKeyPress={this.changeHandler}
+                        spellCheck="false"
+                    />
+                    <p id='correct'>
+                        Words Correct: {this.state.correctWordsList.length}
+                    </p>
+                    <p id='words-left'>
+                        Words Left: {this.state.wordsList.length}
+                    </p>
+                    <span id='voice-select'>
+                        Select a Voice:&nbsp;
+                        <select id='voice-select'
+                                onChange={this.selectChangeHandler}>
+                            {ReactHtmlParser(this.state.voiceOptions)}
+                        </select>
+                    </span>
+                </div>
+                <div>
+                    <input 
+                        type='checkbox' 
+                        onChange={this.checkboxChangeHandler}
+                    />
+                    Show Word List
+                    <div className={this.state.shouldHide ? 'hidden' : ''}
+                        align='center' >
+                        <pre>{ReactHtmlParser(this.state.fullList)}</pre>
+                    </div>
+                </div>
             </div>
         );
     }
