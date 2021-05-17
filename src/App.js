@@ -21,6 +21,7 @@ class App extends React.Component {
             voice: "",
             voices: [],
             voiceOptions: "",
+            textStatus: "clear",   // 'clear' or 'keep'
         };
 
         this.textInput = React.createRef();
@@ -76,10 +77,16 @@ class App extends React.Component {
     }
 
     speak(message) {
-        window.speechSynthesis.cancel();
-        let msg = this.state.msg;
-        msg.text = message;
-        speechSynthesis.speak(msg);
+        //while(speechSynthesis.speaking){
+            // wait for the current speech to end
+        //   console.log('Waiting for the current speech to end.');
+        //}
+        if(! speechSynthesis.speaking){
+            window.speechSynthesis.cancel();
+            let msg = this.state.msg;
+            msg.text = message;
+            speechSynthesis.speak(msg);
+        }
         //speechSynthesis.getVoices().forEach(function(voice) {
         //    console.log(voice.name, voice.lang, voice.default ? voice.default :'');
         //});
@@ -87,7 +94,11 @@ class App extends React.Component {
 
     sayWord(){
         this.speak(this.state.currentWord);
-        this.setState({inputText : ""} );
+        if(this.state.textStatus === "clear"){
+            this.setState({inputText : ""});
+            this.setState({textStatus    : "keep"});
+        }
+        
         this.textInput.current.focus();
     }
 
@@ -95,6 +106,7 @@ class App extends React.Component {
         let guess = this.state.inputText;
         let currentWord = this.state.currentWord;
         if(guess === currentWord){
+            this.setState({textStatus : "clear"});
             this.state.correctWordsList.push(currentWord);
             this.state.wordsList.splice(this.state.wordsList.indexOf(currentWord),1);
             this.speak("correct. " + currentWord + " is spelled " + this.spellWord(currentWord));
@@ -105,6 +117,7 @@ class App extends React.Component {
             }
         } else {
             this.speak("try again. " + currentWord);
+            //this.setState({textStatus:"keep"});
             this.setState((state) => { return {inputText:""} });      // clear the input field
         }
         this.textInput.current.focus();
@@ -115,6 +128,7 @@ class App extends React.Component {
         // say the correct spelling
         let word = this.state.currentWord;
         this.setState({inputText: word});
+        this.setState({textStatus:"clear"});
         this.speak(word + " is spelled " + this.spellWord(word));
         // pick a new random word
         word = this.getNewWord();
